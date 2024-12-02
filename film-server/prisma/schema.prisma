@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String
+  surname  String
+  email    String @unique
+  password String
+  films    Film[]
+}
+
+model Film {
+  id           Int           @id @default(autoincrement())
+  title        String
+  description  String
+  genre        String
+  user         User          @relation(fields: [userId], references: [id])
+  userId       Int
+  script       Script?       @relation(fields: [scriptId], references: [id])
+  scriptId     Int?          @unique
+  finance      Finance?      @relation(fields: [financeId], references: [id])
+  financeId    Int?          @unique
+  createdAt    DateTime      @default(now())
+  shootingDay  ShootingDay[]
+  actors       Actor[]       @relation("FilmActors")
+  crew_members CrewMember[]  @relation("FilmCrewMembers")
+}
+
+model Script {
+  id      Int    @id @default(autoincrement())
+  content String
+  film    Film?  @relation
+  filmId  Int?
+}
+
+model Finance {
+  id               Int   @id @default(autoincrement())
+  budget           Int
+  actor_salary     Int
+  crew_salary      Int
+  advertising_cost Int
+  editing_cost     Int
+  equipment_cost   Int
+  film             Film? @relation
+  filmId           Int?
+}
+
+model ShootingDay {
+  id                       Int      @id @default(autoincrement())
+  shooting_day             DateTime
+  shooting_time            Int
+  shooting_location        String
+  estimated_duration_hours Int
+  filmId                   Int
+  film                     Film     @relation(fields: [filmId], references: [id])
+}
+
+model Actor {
+  id              Int    @id @default(autoincrement())
+  full_name       String
+  rating          Int
+  salary_per_hour Int
+  films           Film[] @relation("FilmActors")
+}
+
+model CrewMember {
+  id              Int    @id @default(autoincrement())
+  full_name       String
+  salary_per_hour Int
+  films           Film[] @relation("FilmCrewMembers")
+}
